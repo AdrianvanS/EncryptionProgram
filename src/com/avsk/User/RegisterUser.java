@@ -1,5 +1,7 @@
 package com.avsk.User;
 
+import com.avsk.MainScreen;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -8,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class RegisterUser extends JFrame implements ActionListener {
@@ -53,10 +56,10 @@ public class RegisterUser extends JFrame implements ActionListener {
     private boolean validPassword;
     private JLabel passwordValidLabel;
 
+
+    //Constructor
     public RegisterUser(List<User> users){
         this.users = users;
-
-
 
         frame = new JFrame();
         frame.setResizable(false);
@@ -98,6 +101,13 @@ public class RegisterUser extends JFrame implements ActionListener {
         emailValidLabel.setBounds(340, 235, 160, 30);
         emailValidLabel.setVisible(false);
         panel.add(emailValidLabel);
+
+        validPassword = false;
+        passwordValidLabel = new JLabel("Must be at least 8 characters and contain letters and numbers.");
+        passwordValidLabel.setFont(new Font("Calibri", Font.PLAIN, 10));
+        passwordValidLabel.setBounds(180, 295, 260, 30);
+        passwordValidLabel.setVisible(false);
+        panel.add(passwordValidLabel);
 
         //----------------Labels start----------------
 
@@ -147,8 +157,10 @@ public class RegisterUser extends JFrame implements ActionListener {
                         fNameValidLabel.setVisible(true);
                     }else{
                         fNameValidLabel.setVisible(false);
+                        firstName = firstNameField.getText();
                     }
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -164,8 +176,10 @@ public class RegisterUser extends JFrame implements ActionListener {
                         fNameValidLabel.setVisible(true);
                     }else{
                         fNameValidLabel.setVisible(false);
+                        firstName = firstNameField.getText();
                     }
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -194,8 +208,10 @@ public class RegisterUser extends JFrame implements ActionListener {
                         lNameValidLabel.setVisible(true);
                     }else{
                         lNameValidLabel.setVisible(false);
+                        lastName = lastNameField.getText();
                     }
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -211,8 +227,10 @@ public class RegisterUser extends JFrame implements ActionListener {
                         lNameValidLabel.setVisible(true);
                     }else{
                         lNameValidLabel.setVisible(false);
+                        lastName = lastNameField.getText();
                     }
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -232,11 +250,31 @@ public class RegisterUser extends JFrame implements ActionListener {
             public void insertUpdate(DocumentEvent e) {
                 boolean valid = checkUserName();
                 validUserName = valid;
+                if (!valid){
+                    userNameValidLabel.setVisible(true);
+                }else{
+                    userNameValidLabel.setVisible(false);
+                    userName = userNameField.getText();
+                }
+                allFieldsValidation();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-
+                boolean valid = checkUserName();
+                validUserName = valid;
+                if (!valid){
+                    if (userNameField.getText().length() == 0){
+                        userNameValidLabel.setVisible(false);
+                        userName = userNameField.getText();
+                    }else{
+                        userNameValidLabel.setVisible(true);
+                    }
+                }else{
+                    userNameValidLabel.setVisible(false);
+                    userName = userNameField.getText();
+                }
+                allFieldsValidation();
             }
 
             @Override
@@ -260,7 +298,9 @@ public class RegisterUser extends JFrame implements ActionListener {
                     emailValidLabel.setVisible(true);
                 }else{
                     emailValidLabel.setVisible(false);
+                    email = emailField.getText();
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -270,12 +310,15 @@ public class RegisterUser extends JFrame implements ActionListener {
                 if (!valid){
                     if (emailField.getText().length() == 0){
                         emailValidLabel.setVisible(false);
+                        email = emailField.getText();
                     }else{
                         emailValidLabel.setVisible(true);
                     }
                 }else{
                     emailValidLabel.setVisible(false);
+                    email = emailField.getText();
                 }
+                allFieldsValidation();
             }
 
             @Override
@@ -290,6 +333,43 @@ public class RegisterUser extends JFrame implements ActionListener {
         passwordField = new JTextField();
         passwordField.setBounds(200, 270, 220, 30);
         passwordField.setFont(new Font("Calibri", Font.PLAIN, 17));
+        passwordField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                boolean valid = checkPassword();
+                validPassword = valid;
+                if (!valid){
+                        passwordValidLabel.setVisible(true);
+                    }else{
+                        passwordValidLabel.setVisible(false);
+                        password = passwordField.getText();
+                    }
+                allFieldsValidation();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                boolean valid = checkPassword();
+                validPassword = valid;
+                if (!valid){
+                    if (passwordField.getText().length() == 0){
+                        passwordValidLabel.setVisible(false);
+                        password = passwordField.getText();
+                    }else{
+                        passwordValidLabel.setVisible(true);
+                    }
+                }else{
+                    passwordValidLabel.setVisible(false);
+                    password = passwordField.getText();
+                }
+                allFieldsValidation();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+        });
         panel.add(passwordField);
 
         //-----------------TextFields end-----------------
@@ -305,7 +385,7 @@ public class RegisterUser extends JFrame implements ActionListener {
         panel.add(registerButton);
         registerButton.setEnabled(false);
         registerButton.addActionListener((e) -> {
-
+            registerUser();
         });
 
         cancelButton = new JButton("Cancel");
@@ -371,4 +451,54 @@ public class RegisterUser extends JFrame implements ActionListener {
         }
         return result;
     }
+
+    private boolean checkPassword(){
+        boolean result = false;
+        int length = passwordField.getText().length();
+        int numbers = passwordField.getText().replaceAll("[^0-9]", "").length();
+        if ((length >= 8) && (numbers > 0)) result = true;
+        return result;
+    }
+
+    private void allFieldsValidation(){
+        if ((validUserName) && (validLastName) && (validFirstName) && (validEmail) && (validPassword)){
+            registerButton.setEnabled(true);
+        }else{
+            registerButton.setEnabled(false);
+        }
+    }
+
+    private void registerUser(){
+        boolean valid = true;
+        try{
+            for (User u : users){
+                if (u.getUserName().equals(userName)){
+                    valid = false;
+                    JOptionPane.showMessageDialog(null, "Username already exists!", "Registration Error", JOptionPane.ERROR_MESSAGE);
+                    userNameField.setText("");
+                    validUserName = false;
+                    allFieldsValidation();
+                }else if (u.getEmail().equals(email)){
+                    valid = false;
+                    JOptionPane.showMessageDialog(null, "Email already exists!", "Registration Error", JOptionPane.ERROR_MESSAGE);
+                    emailField.setText("");
+                    validEmail = false;
+                    allFieldsValidation();
+                }
+            }
+            if (valid){
+                User x = new User(firstName, lastName, userName, email, password);
+                users.add(x);
+                Users newUsers = new Users();
+                newUsers.setUsers(users);
+                newUsers.writeUsers();
+                JOptionPane.showMessageDialog(null, "Registration complete.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose();
+                MainScreen mainScreen = new MainScreen();
+            }
+        }catch (ConcurrentModificationException e){
+            JOptionPane.showMessageDialog(null, "ConcurrentModificationException", "Registration Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 }

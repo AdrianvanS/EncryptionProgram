@@ -34,12 +34,17 @@ public class Users {
         return users;
     }
 
+    public void setUsers(List<User> someUsers){
+        users = someUsers;
+    }
+
     private boolean userExists(User user){
         boolean result = false;
         String userName = user.getUserName();
         String email = user.getEmail();
         for (User x : users){
             if ((userName.equals(x.getUserName())) || (email.equals(x.getEmail()))) result = true;
+            break;
         }
         return result;
     }

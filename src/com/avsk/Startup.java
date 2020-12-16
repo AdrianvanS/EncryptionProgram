@@ -17,7 +17,6 @@ public class Startup {
         splash2.setStart(start);
 //        Users users = new Users();
 //        users.readUsers();
-//
 //        RegisterUser register = new RegisterUser(users.getUsers());
 
     }
